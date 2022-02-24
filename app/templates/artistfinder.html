@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% block scripts %}
+{{super()}}
+<script src="/static/typeahead.bundle.js"></script>
+<script>
+
+var substringMatcher = function(strs) {
+  return function findMatches(q, cb) {
+    var matches, substringRegex;
+
+    // an array that will be populated with substring matches
+    matches = [];
+
+    // regex used to determine if a string contains the substring `q`
+    substrRegex = new RegExp(q, 'i');
+
+    // iterate through the pool of strings and for any string that
+    // contains the substring `q`, add it to the `matches` array
+    $.each(strs, function(i, str) {
+      if (substrRegex.test(str)) {
+        matches.push(str);
+      }
+    });
+
+    cb(matches);
+  };
+};
+
+var artist_list = [
+            {% for artist in artists %}
+            '{{artist}}',
+            {% endfor %}
+];
+
+$('.typeahead')
+.typeahead({
+  hint: true,
+  highlight: true,
+  minLength: 1
+},
+{
+  name: 'artist_list',
+  source: substringMatcher(artist_list),
+  limit: 10,
+})
+.on('typeahead:selected', function(e){
+    e.target.form.submit();;
+});
+</script>
+{% endblock %}
+
+
+
+{% block app_content %}
+<style>
+.twitter-typeahead, .tt-hint, .tt-input, .tt-menu { width: 100%; }
+
+.tt-query {
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+     -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+
+.tt-hint {
+  color: #999
+}
+
+.tt-menu {    /* used to be tt-dropdown-menu in older versions */
+  margin-top: 4px;
+  padding: 4px 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  -webkit-border-radius: 4px;
+     -moz-border-radius: 4px;
+          border-radius: 4px;
+  -webkit-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+     -moz-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+          box-shadow: 0 5px 10px rgba(0,0,0,.2);
+}
+
+.tt-suggestion {
+  padding: 3px 20px;
+  line-height: 24px;
+}
+
+.tt-suggestion.tt-cursor,.tt-suggestion:hover {
+  color: #fff;
+  background-color: #007bff;
+  cursor: pointer;
+
+}
+
+.filter-composer-img {
+  height: 40px;
+  object-fit: cover;
+  width: 40px;
+  border-radius: 50%;
+}
+td {
+
+   height: 15px;
+   padding: 3px;
+   vertical-align: top;
+   border-top: 1px dotted lightgray;
+}
+table{
+   width: 100%;
+   border-collapse: separate;
+}
+
+body{
+    background: #f1f2f4;
+}
+
+.container .jumbotron {
+    position: relative;
+    background: url("https://storage.googleapis.com/composer-explorer.appspot.com/headers/Sketch.jpg") no-repeat center center;
+    background-size: cover;
+    color: white;
+    border-radius: 0px
+    border-radius: 6px ;
+
+}
+.jumbotron > .overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-image: linear-gradient(to bottom left, rgb(52,58,64, 0.4), rgb(52,58,64, 1));
+/*    background-color: rgb(52,58,64, 0.80);*/
+    z-index: 1;
+    border-radius: 6px ;
+}
+
+.jumbotron > .inner {
+    position: relative;
+    z-index: 2;
+}
+</style>
+<div class="jumbotron">
+    <div class="overlay"></div>
+    <div class="inner">
+    <h1>Artist Finder</h1>
+    <h3></h3>
+</div>
+</div>
+
+<div class="spinner" hidden></div>
+<div class="row">
+<div class="col-md-6 composer">
+   <div class="panel panel-default">
+     <div class="panel-body" id="">
+<!--  <div class="row">
+    <div class="container">
+{% if composer %}
+<table class="table-borderless">
+<tbody>
+  <tr>
+    <td width="5%"><a href="{{ url_for('composer.composer_router', name=composer.name_short) }}">
+         <img class ="filter-composer-img" src="{{config['STATIC']}}img/{{ composer.name_short }}.jpg" />
+         </a></td>
+    <td width ="95%"><a href="{{ url_for('composer.composer_router', name=composer.name_short)  }}">
+         <b>{{ composer.name_full }}</b>
+         </a>
+         <br>
+         {{ composer.description }}</td>
+  </tr>
+</tbody>
+</table>
+{% endif %}
+ </div></div> -->
+      <div class="row ">
+    <form class="form" id="workfinderform">
+    <div class="col-xs-6">
+
+            <label for="search">Artist name</label>
+            <input type="text" class="form-control typeahead" onchange="this.form.submit()" name="artist" onfocus="this.value=''" value="{{artist_name}}" placeholder="">
+
+    </div>
+    <div class="col-xs-6">
+
+       <label for="exampleFormControlSelect2">Composer</label>
+    <select class="form-control" onchange="this.form.submit()" name="composer" value="" id="exampleFormControlSelect2">
+      {% for composer in composers %}
+      {% if composer == composer1 %}
+      <option selected>{{composer}}</option>
+      {% else %}
+      <option>{{composer}}</option>
+      {% endif %}
+      {% endfor %}
+    </select>
+
+
+    </div>
+
+ </form>
+
+ </div>
+
+     </div>
+   </div>
+</div>
+
+<div class="col-md-6 works">
+   <div class="panel panel-default">
+     <div class="panel-heading">
+       <h3 class="panel-title">Works</h3>
+     </div>
+     <div class="panel-body" id="">
+     <table>
+     {% for work in works %}
+        <tr>
+          <td width="15%"><span style="white-space: nowrap; color:darkred;">{{work.cat}}</span></td>
+        <td width="85%" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:1px;"><a href="/albums/{{work.id}}?artist={{artist_name}}" style="cursor: pointer; color:black;">{{work.title}}</a><span style="color:gray;">{% if work.nickname %} · {{work.nickname}}{% endif %}</span></td>
+        </tr>
+     {% endfor %}
+     </table>
+     </div>
+   </div>
+</div>
+</div>
+
+<div class="container">
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-info" role="alert">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+{% endwith %}
+</div>
+
+{% include '_alertmodal.html' %}
+{% include '_simplemodal.html' %}
+{% endblock %}

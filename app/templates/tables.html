@@ -1,0 +1,260 @@
+{% extends "base_wide.html" %}
+{% block scripts %}
+{{super()}}
+<script type="text/javascript">
+    $('#composerModal').on('hidden.bs.modal', function(e) {
+        pausespotify();
+    });
+
+    var composers = [{% for composer in composers %}{{composer.id}},{% endfor %}0];
+
+</script>
+{% endblock %}
+{% block app_content %}
+<style>
+
+td {
+    height: 20px;
+   padding: 1px;
+   vertical-align: middle;
+   border-top: 1px dotted lightgray;
+}
+
+
+table{
+   width: 100%;
+   border-collapse: separate;
+}
+body{
+    background: #f1f2f4;
+}
+h3.panel-title{
+  margin-top: 0px !important;
+  font-weight: bold;
+}
+div[role="tab"]:hover {
+  cursor: pointer;
+}
+div[aria-expanded=false]  .glyphicon-chevron-up {
+   display: none;
+}
+div[aria-expanded=true] .glyphicon-chevron-down {
+   display: none;
+}
+.panel-body{
+   padding-top:  0px;
+   padding-bottom: 5px;
+}
+.panel{
+   margin-bottom: 5px;
+}
+.equal {
+    display: -webkit-flex;
+    display: flex;
+}
+h5{
+   margin-top: 20px;
+   margin-bottom: 0px;
+   text-align:  center;
+}
+.composer-img{
+    border-radius: 50%;
+    object-fit: cover;
+}
+{% if request.MOBILE %}
+.container-fluid{
+   overflow-x: hidden;
+}
+h3.panel-title{
+  max-height: 999999px;
+}
+h5{
+    max-height: 999999px;
+}
+{% endif %}
+
+</style>
+<nav class="navbar navbar-inverse navbar-wide navbar-sub">
+    <div class="container">
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle filter-button disabled" data-toggle="dropdown" {% if disable_sort %}disabled{% endif %}> Sort <span class="caret"></span> </button>
+            <ul class="dropdown-menu">
+                <li><a href="?sort=region">Region</a></li>
+                <li><a href="?sort=birth">Birth date</a></li>
+                <li><a href="?sort=death">Death date</a></li>
+                <li><a href="?sort=popularity">Popularity</a></li>
+            </ul>
+        </div>
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle filter-button" data-toggle="dropdown"> Filter <span class="caret"></span> </button>
+            <ul class="dropdown-menu">
+                <h6 class="dropdown-header">Period</h6>
+                <li><a href="?era=Common">Common Practice</a></li>
+                <li><a href="?era=Early">Early</a></li>
+                <li><a href="?era=All">All</a></li>
+                <li class="divider"></li>
+                <h6 class="dropdown-header">Era</h6>
+                <li><a href="?era=Baroque">Baroque</a></li>
+                <li><a href="?era=Classical">Classical</a></li>
+                <li><a href="?era=Romantic">Romantic</a></li>
+                <li><a href="?era=20th/21st Century">20th/21st Century</a></li>
+                <li class="divider"></li>
+                <h6 class="dropdown-header">Misc</h6>
+                <li><a href="?filter=popular">Most Popular</a></li>
+     <!--            <li><a href="?filter=catalogued">Explorable</a></li> -->
+                <li><a href="?filter=women">Women</a></li>
+            </ul>
+        </div>
+         <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle filter-button" data-toggle="dropdown"> View <span class="caret"></span> </button>
+            <ul class="dropdown-menu">
+               <li><a href="/index?view=timeline">Timeline</a></li>
+               <li><a href="/tables">Tables</a></li>
+            </ul>
+         </div>
+        <ul class="nav navbar-nav navbar-right">
+                {% if current_user.is_anonymous %}
+                <button type="button" onclick="getspotify();"  class="btn btn-success" id="spotify-button"><img src="static/Spotify_Logo_RGB_White.png" width="78.7" height="23.61" alt=""></button>
+                {% else %}
+                <a class="navbar-brand navbar-avatar" href="{{ url_for('user.user', username=current_user.username) }}"><img class="loginavatar" src="{{current_user.avatar(38)}}" width="38" height="38" alt=""></a>
+                {% endif %}
+        </ul>
+        <form class="navbar-form navbar-right" role="search">
+            <div class="form-group">
+                <input type="search" class="form-control composer-search-form" name="search" value="{{ search }}" placeholder="Composer Search">
+            </div>
+            {% if search %}
+            <a href="/" class="btn bg-transparent" style="position: absolute; margin-left: -35px; z-index: 100;"><span class="glyphicon glyphicon-remove"></span></a>
+            {% endif %}
+        </form>
+    </div>
+</nav>
+
+
+<div class="spinner" hidden></div>
+
+{% if not session['welcome_off'] %}
+{{session['welcome']}}
+<div id="welcome" class="jumbotron jumbotron-fluid text-center">
+  <div class="container">
+    <h1 class="display-4">Welcome</h1>
+    <p class="lead">Welcome to your Classical Music Portal. Explore composers from the Medieval to the present. <br> Listen to works on <b>Spotify, made navigable for Classical music.</b></p>
+
+    <section id="what-we-do" class="what-we-do">
+      <div class="container">
+
+        <div class="row">
+          <div class="col-lg-4 col-md-4 d-flex align-items-stretch">
+            <div class="icon-box">
+              <div class="icon"><i class="bx bx-search"></i></div>
+              <h4>Explore</h4>
+              <p>Discover new composers and new works by the composers you love. For the newcomer and the completionist.</p>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-4 d-flex align-items-stretch mt-4 mt-md-0">
+            <div class="icon-box">
+              <div class="icon"><i class="bx bx-music"></i></div>
+              <h4>Play Music</h4>
+              <p>Browse albums and connect with your Spotify account to play music and create playlists. Discover new artists.</p>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-4 d-flex align-items-stretch mt-4 mt-lg-0">
+            <div class="icon-box">
+              <div class="icon"><i class="bx bx-message"></i></div>
+              <h4>Engage</h4>
+              <p>Discuss works and performances, rate albums, track works you've explored, and add composers to your favorites.</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <button onclick="getspotify();" class="btn btn-success">Get Started</button> <a href="{{url_for('main.close_welcome')}}" class="btn btn-default filter-button">Hide</a>
+  </div>
+</div>
+{% endif %}
+{% if page_title != "All Composers" %}
+<h5><b>{{page_title}}</b> | <a href="?era=All">Show all</a></h5>
+{% else %}
+<h5><b>{{page_title}}</b> | <a href="?filter=popular">Show popular</a></h5>
+{% endif %}
+<br>
+{% if request.MOBILE %}<div class="container-fluid">{% else %}<div class="container">{% endif %}
+<div class ="row">
+{% for composer in composers %}
+{% if loop.previtem %}
+   {% if composer.region != loop.previtem.region %}
+
+   {% if composer.region == split_region %}
+   </div>
+   <div class="col-md-6">
+   {% endif %}
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" data-toggle="collapse" aria-expanded="{% if collapse %}false{% else %}true{% endif %}" data-target="#{{ composer.id}}">
+          <h3 class="panel-title">{{composer.region_name}}<span class="glyphicon glyphicon-chevron-down pull-right"></span><span class="glyphicon glyphicon-chevron-up pull-right"></span></h3>
+        </div>
+        <div class="panel-body collapse {% if not collapse %}in{% endif %}" id="{{composer.id}}">
+        <table>
+        {% for composer2 in composers %}{% if composer2.region == composer.region %}
+           <tr>
+            <td width="2%" style="border: 0px !important; background-color:{{composer2.era_colour}}; opacity: 0.66;">
+             </td>
+                  <td width="2%"></td>
+             <td width="12%" style="white-space: nowrap;">
+                <image class="composer-img" src="{{config['STATIC']}}flags/1x1/{{ composer2.flag }}.svg" height="25" width="25">
+                    <image class="composer-img" src="{{config['STATIC']}}img/{{ composer2.name_short }}.jpg" height="25" width="25">
+             </td>
+            <td width="50%" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:1px;"><a onclick='requestcomposer("{{ composer2.id }}")' style="cursor: pointer; color:black;">{% if composer2.catalogued == True and composer_filter != "popular"%}<b>{{composer2.name_full}}</b>{% else %}{{composer2.name_full}}{% endif %}</a></td>
+           <td width="25%" style="text-align: right;">{{composer2.born}} - {% if composer2.died == 2050 %}present{% else %}{{composer2.died}}{% endif %}</td>
+           </tr>
+        {% endif %}{% endfor %}
+        </table>
+        </div>
+      </div>
+   {% endif %}
+{% else %}
+   <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" data-toggle="collapse" aria-expanded="{% if collapse %}false{% else %}true{% endif %}" data-target="#{{ composer.id}}">
+          <h3 class="panel-title">{{composer.region_name}}<span class="glyphicon glyphicon-chevron-down pull-right"></span><span class="glyphicon glyphicon-chevron-up pull-right"></span></h3>
+        </div>
+        <div class="panel-body collapse {% if not collapse %}in{% endif %}" id="{{composer.id}}">
+        <table>
+        {% for composer2 in composers %}{% if composer2.region == composer.region %}
+           <tr>
+            <td width="2%" style="border: 0px !important; background-color:{{composer2.era_colour}}; opacity: 0.66;">
+             </td>
+                  <td width="2%"></td>
+             <td width="12%" style="white-space: nowrap;">
+                <image class="composer-img" src="{{config['STATIC']}}flags/1x1/{{ composer2.flag }}.svg" height="25" width="25">
+                    <image class="composer-img" src="{{config['STATIC']}}img/{{ composer2.name_short }}.jpg" height="25" width="25">
+             </td>
+            <td width="50%" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:1px;"><a onclick='requestcomposer("{{ composer2.id }}")' style="cursor: pointer; color:black;">{% if composer2.catalogued == True and composer_filter != "popular"%}<b>{{composer2.name_full}}</b>{% else %}{{composer2.name_full}}{% endif %}</a></td>
+           <td width="25%" style="text-align: right;">{{composer2.born}} - {% if composer2.died == 2050 %}present{% else %}{{composer2.died}}{% endif %}</td>
+           </tr>
+        {% endif %}{% endfor %}
+        </table>
+        </div>
+      </div>
+{% endif %}
+{% endfor %}
+</div>
+</div>
+</div>
+
+<audio id="preview_audio">
+  <source src="" type="audio/mpeg">
+</audio>
+
+{% for composer in composers %}
+    {% if composer.name in distinct %}
+        <a href="/composer/{{ composer.name }}" hidden>{{ composer.name }}</a>
+    {% endif %}
+{% endfor %}
+{% include '_composermodal.html' %}
+{% include 'spotify/_getspotifymodal.html' %}
+{% endblock %}

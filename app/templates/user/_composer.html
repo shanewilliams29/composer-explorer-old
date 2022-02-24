@@ -1,0 +1,20 @@
+<table class="table table-borderless table-condensed">
+   <tr>
+      <td width="85px">
+         <a href="{{ url_for('composer.composer', name=composer.name_short) }}">
+         <img class ="favorite-composer-img" src="{{config['STATIC']}}img/{{ composer.name_short }}.jpg" />
+         </a>
+      </td>
+      <td style="vertical-align:middle;">
+         <a href="{{ url_for('composer.composer_router', name=composer.name_short)  }}">
+         <b>{{ composer.name_full }}</b>
+         </a>
+         <br>
+         {{ composer.description }}
+         <br>
+         <a href="{{ url_for('user.unfavorite_composer', composerid=composer.id) }}">
+         Remove
+         </a>
+      </td>
+   </tr>
+</table>

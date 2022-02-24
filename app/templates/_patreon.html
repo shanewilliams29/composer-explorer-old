@@ -1,0 +1,16 @@
+{% if current_user.is_authenticated %}
+{% if not current_user.patreon %}
+{% if not session['patreon_off'] %}
+<div class="patreon-banner">
+<div class="container">
+{% if not request.MOBILE %}
+<p class="navbar-patreon">Help keep Composer Explorer online and ad-free. <a href="https://www.patreon.com/composerexplorer" target="_blank" class="patreon-link">Support us on Patreon! </a><a href="{{url_for('main.close_patreon')}}" class="patreonclosebtn">&times;</a></p>
+{% else %}
+<p class="navbar-patreon-mobile">Keep Composer Explorer online and ad-free.<br>
+<a href="https://www.patreon.com/composerexplorer" target="_blank" class="patreon-link">Support us on Patreon! </a><a href="{{url_for('main.close_patreon')}}" class="patreonclosebtn">&times;</a></p>
+{% endif %}
+</div>
+{% endif %}
+{% endif %}
+{% endif %}
+</div>

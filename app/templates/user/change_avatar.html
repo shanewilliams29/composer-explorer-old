@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    <h1>Change Profile Picture</h1>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+     {% for category, message in messages %}
+    <div class="alert alert-{{category}}" role="alert">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+{% endwith %}
+
+    <div class="row">
+        <div class="col-md-4">
+            {{ wtf.quick_form(form) }}
+        </div>
+    </div>
+    <hr>
+    <a href="/">Cancel</a>
+{% endblock %}

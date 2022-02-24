@@ -1,0 +1,21 @@
+<div class="modal fade" id="getspotifymodal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title"><b>Spotify Connect</b></h4>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Sign in with your Spotify account to listen to albums, create playlists, and engage with the community. In-browser music playback requires Spotify Premium.</p>
+        <br>
+        <b>Your Privacy is Important.</b> Your email address is <b>not</b> collected from Spotify. Only your public display name and profile picture are stored. These can be changed or deleted from your Profile page after logging in.
+        Your Spotify ID and other data is not stored or made public.
+      <br><br>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <a href="{{ url_for('spotify.connect_spotify') }}" type="button" class="btn btn-success">Connect to Spotify</a>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,30 @@
+
+<div class='albumheader'>
+        <p class="album-font"><b>{{ track.artists }} ({{ track.release_date }})</b></p>
+        <p class="album-sub"><i>{{ track.all_artists }}</i></p>
+</div>
+<table class="table table-borderless table-condensed">
+    <tr>
+        <td width="70px" style="text-align:center">
+            <a href="{{ track.album_uri }}"><img class ="album-cover" src="{{ track.album_img }}" /></a>
+
+        </td>
+        <td style="vertical-align:top">
+
+{% for item in track.firstfive %}
+<input type="checkbox" class="albumoptions" id="{{item[1]}}" name="album" value="{{item[1]}}">
+<a class="album-font-link {{item[1]}}" onclick='playtrack("{{item[2]}}");' for="{{item[1]}}"> {{item[0]}}</a><br>
+{% endfor %}
+
+{% if track.tracks %}
+<a type="" class="showmore" data-toggle="collapse" data-target="#{{ track.album_id }}">Show more</a>
+<div id="{{ track.album_id }}" class="collapse">
+{% for item in track.tracks %}
+<input type="checkbox" class="albumoptions" id="{{item[1]}}" name="album" value="{{item[1]}}">
+<a class="album-font-link {{item[1]}}" onclick='playtrack("{{item[2]}}");' for="{{item[1]}}"> {{item[0]}}</a><br>
+{% endfor %}
+</div>
+{% endif %}
+        </td>
+    </tr>
+</table>

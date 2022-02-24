@@ -1,0 +1,184 @@
+{% extends "base_wide.html" %}
+{% block scripts %}
+{{super()}}
+<script src = "https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"> </script>
+<script src="{{url_for('static', filename='tooltip.js')}}"></script> <!-- For fixing tooltip on SVG -->
+<script type="text/javascript">
+   $('#composerModal').on('hidden.bs.modal', function(e) {
+       pausespotify();
+   });
+</script>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<script type="text/javascript">
+   $(document).ready(function() {
+       $('#simple-message').html("Success! Your playlist mix has been added to Spotify.");
+       $('#simple-modal').modal('show');
+   });
+</script>
+{% endfor %}
+{% endif %}
+{% endwith %}
+{% endblock %}
+{% block app_content %}
+<div class="container-fluid composer-title">
+   <div class="col-md-6 col-xs-12 col-md-push-3 col-lg-push-3 title-column2 text-center">
+      <img class="composer-page-photo" src="{{ config['STATIC'] + composer.flagimg }}">
+      <img class="composer-page-photo" src="{{config['STATIC'] + 'img/' + composer.name_short }}.jpg"><span class="composer-page-title">{{composer.name_short}}</span>
+   </div>
+   <div class="container">
+      <div class="col-md-3 col-xs-6 col-md-pull-6 col-lg-pull-6 title-column1">
+         <div class="btn-group">
+            <a type="button" href="/" class="btn btn-default filter-button composer-button"> Main </a>
+         </div>
+         <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle filter-button composer-button" data-toggle="dropdown"> Filter <span class="caret"></span> </button>
+            <ul class="dropdown-menu">
+               <li><a href="?filter=playable">Playable</a></li>
+               <li><a href="?filter=recommended">Most Recommended</a></li>
+               <li><a href="?filter=all">All</a></li>
+            </ul>
+         </div>
+         <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle filter-button composer-button" data-toggle="dropdown"> View <span class="caret"></span> </button>
+            <ul class="dropdown-menu">
+               <li><a href="/composer/{{composer.name_short}}">Timeline</a></li>
+               <li><a href="/composerpanels/{{composer.name_short}}">Tables</a></li>
+            </ul>
+         </div>
+      </div>
+      <div class="col-md-3 col-xs-6 title-column3">
+         <form class="navbar-form navbar-right composer-right" role="search">
+            <div class="form-group">
+               <input type="search" class="form-control work-search-form" name="search" value="{{ search }}" placeholder="Work Search">
+            </div>
+            {% if search %}
+            <a href="/composer/{{composer.name_short}}" class="btn bg-transparent" style="position: absolute; margin-left: -35px; z-index: 100;"><span class="glyphicon glyphicon-remove"></span></a>
+            {% endif %}
+         </form>
+         {% if current_user.is_authenticated %}
+         <button type="button" onclick="createComposerPlaylist();"  class="btn btn-success" id="spotify-button2">Create Playlist</button>
+         {% else %}
+         <button type="button" onclick="notLoggedIn();"  class="btn btn-success" id="spotify-button2">Create Playlist</button>
+         {% endif %}
+      </div>
+   </div>
+</div>
+{% if not request.MOBILE %}
+<div class = "stickybar">
+   <svg class="chart" width="100%" height="59" role="img">
+      <rect class = "datebar" width="100%" height=20 x=0 y=0></rect>
+      {% for year in years %}
+      <text class = "dates" x="{{ years[year] }}%" y=10 dy=".35em" text-anchor="middle">{{ year }}</text>
+      {% endfor %}
+      {% for era in eras %}
+      <a href="/?era={{era[0]}}">
+         <g class="erabar">
+            <rect x="{{era[4]}}%" y="20" width="{{era[5]-era[4]}}%" height="39"  style="fill:{{era[3]}}"/>
+            <text x="{{era[4]+0.5*(era[5]-era[4])}}%" y="31" dx="0px" dy=".35em" font-weight="600" text-anchor="middle">{{era[0]}}</text>
+         </g>
+      </a>
+      {% endfor %}
+      <!-- Masterpieces -->
+      {% for masterpiece in masterpieces %}
+      <circle r=2.5 cx="{{ masterpiece.xposition }}%" cy="48" fill="white"/><!-- <image xlink:href="{{config['STATIC']}}img/{{ masterpiece.composer }}.jpg" height="15.3" width="15.3" preserveAspectRatio="xMidYMid slice" x="{{ masterpiece.xposition }}%" y="{{ 27 }}" transform="translate(0 0)"/> -->
+      <text class="work-text" font-size="12" fill="white" x="{{ masterpiece.xposition }}%" y="48" dy="1.0em" font-weight="" transform="translate(8 -8.5)" onclick='requestwork("{{ masterpiece.id }}");'>{{ masterpiece.title }}</text>
+      {% endfor %}
+   </svg>
+</div>
+{% else %}
+<div class = "stickybar">
+   <svg class="chart" width="100%" height="39" role="img">
+      <rect class = "datebar" width="100%" height=20 x=0 y=0></rect>
+      {% for year in years %}
+      <text class = "dates" x="{{ years[year] }}%" y=10 dy=".35em" text-anchor="middle">{{ year }}</text>
+      {% endfor %}
+      {% for era in eras %}
+      <a href="/?era={{era[0]}}">
+         <g class="erabar">
+            <rect x="{{era[4]}}%" y="20" width="{{era[5]-era[4]}}%" height="39"  style="fill:{{era[3]}}"/>
+            <text x="{{era[4]+0.5*(era[5]-era[4])}}%" y="30" dx="0px" dy=".35em" text-anchor="middle">{{era[0]}}</text>
+         </g>
+      </a>
+      {% endfor %}
+   </svg>
+</div>
+{% endif %}
+<div class="spinner" hidden></div>
+<div id="svgchart">
+   <svg class="chart" width="100%" height="{{svgheight}}" role="img">
+      <defs>
+         <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:rgb(241,242,244);stop-opacity:0" />
+            <stop offset="100%" style="stop-color:rgb(241,242,244);stop-opacity:1" />
+         </linearGradient>
+      </defs>
+      <defs>
+         <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:rgb(241,242,244);stop-opacity:1" />
+            <stop offset="100%" style="stop-color:rgb(241,242,244);stop-opacity:0" />
+         </linearGradient>
+      </defs>
+      {% for year in years %}
+         <rect class = "dateline" width=1 height="{{svgheight}}" x="{{years[year]}}%" y=0></rect>
+      {% endfor %}
+      <rect class = "borndiedblock" width="{{borndied.xborn}}%" height="{{svgheight}}" x="0" y=0></rect>
+      <rect class = "borndiedblock" width="4000" height="{{svgheight}}" x="{{borndied.xdied}}%" y=0></rect>
+      {% for work in works %}
+         {% if work.recommend %}
+            {% set weight = "600" %}
+         {% endif %}
+         {% if filter_method == "all" and work.id not in catalogued %}
+            {% set opacity = "0.3" %}
+         {% endif %}
+         <g class="bar-work" id ="{{ work.id }}" data-container="#svgchart" data-toggle="popover" data-placement="top" data-content="No Spotify tracks found" onclick='requestwork("{{ work.id }}");'>
+            {% if current_user.is_authenticated %}
+               {% if work.id in visitlist %}
+                  {% set hidden = "hidden" %}
+                  <text class="work-text" fill="darkred" x="{{ work.xposition }}%" y="{{ work.yposition }}" dy="1.0em" font-weight="{{ weight }}" transform="translate(-6 -9.5)">✔</text>
+               {% endif %}
+            {% endif %}
+            {% if work.album_count %}
+            <circle fill-opacity="0.1" r={{math.sqrt(work.album_count)}} cx="{{ work.xposition }}%" cy="{{ work.yposition }}" stroke="darkred" stroke-opacity="0.10" stroke-width="0px" fill="darkred"/>
+            {% endif %}
+            <circle {{hidden}} opacity="{{opacity}}" r=2.5 cx="{{ work.xposition }}%" cy="{{ work.yposition }}" fill="darkred"/>
+            {% if work.nickname %}
+               <text opacity="{{opacity}}" class="work-text" fill="black" x="{{ work.xposition }}%" y="{{ work.yposition }}" dy="1.0em" font-weight="" transform="translate(8 -9.5)">{{ work.title}}<tspan class="nickname" fill="dimgray"> • {{work.nickname}}</tspan></text>
+            {% else %}
+               <text opacity="{{opacity}}" class="work-text" fill="black" x="{{ work.xposition }}%" y="{{ work.yposition }}" dy="1.0em" font-weight="" transform="translate(8 -9.5)">{{ work.title}}</text>
+            {% endif %}
+            <text opacity="{{opacity}}" x="{{ work.xposition }}%" y="{{ work.yposition }}" dy="1.0em" font-weight="normal" transform="translate(-8 -9.5)" text-anchor="end" fill="darkred">{{ work.opus }}</text>
+            <text x="{{ work.xposition }}%" y="{{ work.yposition }}" dy="1.0em" font-weight="bold" text-decoration="underline" transform="translate(8 -30)">{{ work.heading }}</text>
+            {% if not work.opus %}
+               <rect opacity="{{opacity}}" width="0.5px" height="19" x="{{ work.xposition }}%" y="{{ work.yposition - 19}}" fill="none" transform="translate(-0.25 0)" stroke="darkred" stroke-width="1"/></rect>
+            {% endif %}
+         </g>
+      {% endfor %}
+      <!-- Fade to grey blocks on sides -->
+      <rect class = "fadeblock" fill="url(#gradient2)" width="5%" height="{{svgheight}}" x="0%" y=0></rect>
+      <rect class = "fadeblock" fill="url(#gradient)" width="5%" height="{{svgheight}}" x="95%" y=0></rect>
+      <!-- Age line -->
+      <text class="age-text" text-anchor="middle" fill="black" x="{{borndied.xborn}}%" y="32" dy="1.0em" transform="translate(0 0)">Born</text>
+      <circle r=2.5 cx="{{ borndied.xborn }}%" cy="27"/>
+      <circle r=2.5 cx="{{ borndied.xdied }}%" cy="27"/>
+      <text class="age-text" text-anchor="middle" fill="black" x="{{borndied.xdied}}%" y="32" dy="1.0em" transform="translate(0 0)">Died</text>
+      {% for age in ages %}
+         <text class="age-text" text-anchor="middle" fill="black" x="{{ ages[age] }}%" y="4" dy="1.0em" transform="translate(0 0)">{{ age }}</text>
+         <circle r=2.5 cx="{{ ages[age] }}%" cy="27"/>
+      {% endfor %}
+      <rect class = "borndiedline" width="{{borndied.xdied - borndied.xborn}}%" height="1" x="{{borndied.xborn}}%" y=26.5></rect>
+
+   </svg>
+</div>
+{% for work in works %}
+   {% if work.id in catalogued %}
+   <a href="/albums/{{ work.id }}" hidden>{{ work.title }}</a>
+   {% endif %}
+{% endfor %}
+{% include '_footermain.html' %}
+{% include 'spotify/_composerplaylistmodal.html' %}
+{% include 'spotify/_getspotifymodal.html' %}
+{% include '_alertmodal.html' %}
+{% include '_simplemodal.html' %}
+{% endblock %}

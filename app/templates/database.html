@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block app_content %}
+    <h1>Export Database</h1>
+
+    <p>With this form you can export the structured work information for a composer directly from the database. No guarantee is made as to the accuracy of the information.</p>
+    <p>Data is returned in JSON format. It can be converted to CSV and other formats using any number of free <a href="https://www.convertcsv.com/json-to-csv.htm">online converters</a>.</p>
+
+
+    <div class="row">
+        <div class="col-md-4">
+            {{ wtf.quick_form(form) }}
+        </div>
+    </div>
+    <br>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info" role="alert">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+{% endblock %}

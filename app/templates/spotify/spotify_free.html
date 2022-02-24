@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block scripts %}
+{{super()}}
+{% endblock %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% block app_content %}
+<h2>Welcome, {{current_user.display_name.split()[0]}}!</h2>
+<style>
+body {
+    background-color: #f0f3f4;
+}
+</style>
+
+<div class="panel panel-default">
+  <div class="panel-body">
+    Your musical journey awaits. <a href="/"> Get started</a>.
+  </div>
+</div>
+
+
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info" role="alert">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+
+
+{% endblock %}

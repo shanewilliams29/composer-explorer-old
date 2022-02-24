@@ -1,0 +1,74 @@
+
+<div class='albumheader'>
+        <p class="album-font"><b>{{ track.artists }} ({{ track.release_date }})</b></p>
+        <p class="album-sub"><i>{{ track.minor_artists }}</i></p>
+
+</div>
+<table class="table table-borderless table-condensed">
+    <tr>
+        <td width="70px" style="text-align:center">
+            <a href="{{ track.album_uri }}"><img class ="album-cover" src="{{ track.album_img }}" /></a>
+{% if current_user.is_authenticated %}
+  {% if current_user.has_liked_album(work.id+track.album_id) %}
+    <a style="color: goldenrod;" href="{{ url_for('albums.like_action', album_id=work.id+track.album_id, action='unlike') }}"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Liked</a>
+  {% else %}
+    <a href="{{ url_for('albums.like_action', album_id=work.id+track.album_id, action='like') }}"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Like</a>
+  {% endif %}
+  {% if track.likes > 0 %}
+ (<a style="cursor:pointer;" onclick='showlikes("{{work.id+track.album_id}}");'>{{track.likes}}</a>)
+   {% else %}
+   ({{track.likes}})
+  {% endif %}
+  {% else %}
+  <a href="{{ url_for('albums.like_action', album_id=work.id+track.album_id, action='like') }}"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Like</a>
+     ({{track.likes}})
+  {% endif %}
+
+        </td>
+
+{% if session['premium'] %}
+<td style="vertical-align:top">
+
+{% for item in track.firstfive %}
+<input type="checkbox" class="albumoptions" id="{{item[1]}}" name="album" value="{{item[1]}}">
+<a class="album-font-link {{item[1]}}" onclick='playtrack("{{item[2]}}");' for="{{item[1]}}"> {{item[0]}}</a><br>
+{% endfor %}
+
+{% if track.tracks %}
+<a type="" class="showmore" data-toggle="collapse" data-target="#{{ track.album_id }}">Show more</a>
+<div id="{{ track.album_id }}" class="collapse">
+{% for item in track.tracks %}
+<input type="checkbox" class="albumoptions" id="{{item[1]}}" name="album" value="{{item[1]}}">
+<a class="album-font-link {{item[1]}}" onclick='playtrack("{{item[2]}}");' for="{{item[1]}}"> {{item[0]}}</a><br>
+{% endfor %}
+</div>
+{% endif %}
+</td>
+{% endif %}
+{% if not session['premium'] %}
+<td style="vertical-align:top">
+
+{% for item in track.firstfive %}
+<input type="checkbox" class="albumoptions" id="{{item[1]}}" name="album" value="{{item[1]}}">
+<a class="album-font-link {{item[1]}}" href="spotify:track:{{item[1]}}" for="{{item[1]}}"> {{item[0]}}</a><br>
+{% endfor %}
+
+{% if track.tracks %}
+<a type="" class="showmore" data-toggle="collapse" data-target="#{{ track.album_id }}">Show more</a>
+<div id="{{ track.album_id }}" class="collapse">
+{% for item in track.tracks %}
+<input type="checkbox" class="albumoptions" id="{{item[1]}}" name="album" value="{{item[1]}}">
+<a class="album-font-link {{item[1]}}" href="spotify:track:{{item[1]}}" for="{{item[1]}}"> {{item[0]}}</a><br>
+{% endfor %}
+</div>
+{% endif %}
+</td>
+{% endif %}
+
+
+
+
+</tr>
+</table>
+
+

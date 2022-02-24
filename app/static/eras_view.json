@@ -1,0 +1,38 @@
+[
+  [
+    "Medieval",
+    1000,
+    1700,
+    "black"
+  ],
+  [
+    "Renissance",
+    1400,
+    1700,
+    "maroon"
+  ],
+  [
+    "Baroque",
+    1500,
+    1800,
+    "darkgoldenrod"
+  ],
+  [
+    "Classical",
+    1700,
+    1850,
+    "darkgreen"
+  ],
+  [
+    "Romantic",
+    1750,
+    1950,
+    "navy"
+  ],
+  [
+    "20th/21st Century",
+    1825,
+    2025,
+    "black"
+  ]
+]

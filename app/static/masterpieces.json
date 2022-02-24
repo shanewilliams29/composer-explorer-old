@@ -1,0 +1,116 @@
+[
+  {
+    "id": "MONTEVERDI00477",
+    "title": "L’Orfeo",
+    "composer": "Monteverdi",
+    "date": 1607
+  },
+  {
+    "id": "PURCELL00455",
+    "title": "Dido and Aeneas",
+    "composer": "Purcell",
+    "date": 1687
+  },
+  {
+    "id": "BACH00283",
+    "title": "Mass in B minor",
+    "composer": "Bach",
+    "date": 1749
+  },
+  {
+    "id": "VIVALDI00343",
+    "title": "The Four Seasons",
+    "composer": "Vivaldi",
+    "date": 1723
+  },
+  {
+    "id": "MOZART00424",
+    "title": "Le nozze di Figaro",
+    "composer": "Mozart",
+    "date": 1786
+  },
+  {
+    "id": "BEETHOVEN00003",
+    "title": "Eroica Symphony",
+    "composer": "Beethoven",
+    "date": 1804
+  },
+  {
+    "id": "BERLIOZ00035",
+    "title": "Symphonie fantastique",
+    "composer": "Berlioz",
+    "date": 1830
+  },
+  {
+    "id": "SCHUBERT00788",
+    "title": "Trout Quintet",
+    "composer": "Schubert",
+    "date": 1819
+  },
+  {
+    "id": "WAGNER00009",
+    "title": "Tristan und Isolde",
+    "composer": "Wagner",
+    "date": 1859
+  },
+  {
+    "id": "VERDI00028",
+    "title": "Otello",
+    "composer": "Verdi",
+    "date": 1887
+  },
+  {
+    "id": "DEBUSSY00124",
+    "title": "Afternoon of a Faun",
+    "composer": "Debussy",
+    "date": 1894
+  },
+  {
+    "id": "TCHAIKOVSKY00020",
+    "title": "Swan Lake",
+    "composer": "Tchaikovsky",
+    "date": 1875
+  },
+  {
+    "id": "PROK00083",
+    "title": "Romeo and Juliet",
+    "composer": "Prokofiev",
+    "date": 1936
+  },
+  {
+    "id": "SHOSTAK00131",
+    "title": "Symphony No. 10",
+    "composer": "Shostakovich",
+    "date": 1953
+  },
+  {
+    "id": "STRAVINSKY00021",
+    "title": "Rite of Spring",
+    "composer": "Stravinsky",
+    "date": 1913
+  },
+  {
+    "id": "HAYDN00045",
+    "title": "Farewell Symphony",
+    "composer": "Haydn",
+    "date": 1772
+  },
+  {
+    "id": "HANDEL00008",
+    "title": "Rinaldo",
+    "composer": "Handel",
+    "date": 1711
+  },
+ {
+    "id": "PUCCINI00013",
+    "title": "Turandot",
+    "composer": "Puccini",
+    "date": 1924
+  },
+ {
+    "id": "MEND00028",
+    "title": "Elijah",
+    "composer": "Mendelssohn",
+    "date": 1846
+  }
+]

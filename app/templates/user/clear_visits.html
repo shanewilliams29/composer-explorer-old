@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    <h1>Clear Visited Works</h1>
+    <div class="alert alert-warning" role="alert">WARNING: This will delete all records of which works you have visited and cannot be undone.</div>
+    <div class="row">
+        <div class="col-md-4">
+            {{ wtf.quick_form(form) }}
+        </div>
+    </div>
+    <hr>
+    <a href="/">Back to safety</a>
+{% endblock %}

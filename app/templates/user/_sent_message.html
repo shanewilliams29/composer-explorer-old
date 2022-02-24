@@ -1,0 +1,17 @@
+
+    <tr>
+        <td width="43px">
+            <a href="{{ url_for('user.user', username=post.author.username) }}">
+                <img class="message-avatar" src="{{ post.recipient.avatar(30)}}" />
+            </a>
+        </td>
+        <td>
+            Sent to <b><a href="{{ url_for('user.user', username=post.recipient.username) }}">{{ post.recipient.display_name }}</a></b>:
+            <span class="pull-right" style="color:#8d95a5">{{ moment(post.timestamp).fromNow()}}</span>
+            <br>
+            <p style="white-space: pre-line;">{{ post.body }}</p>
+            <span class="pull-right"><a href="{{ url_for('user.delete_sent_message', message_id=post.id) }}">Delete</a></span>
+        </td>
+    </tr>
+
+

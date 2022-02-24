@@ -1,0 +1,21 @@
+
+    <tr>
+        <td width="43px">
+            <a href="{{ url_for('user.user', username=post.author.username) }}">
+                <img class="message-avatar" src="{{ post.author.avatar(30)}}" />
+            </a>
+        </td>
+        <td>
+            <b><a href="{{ url_for('user.user', username=post.author.username) }}">{{ post.author.display_name }}</a></b>
+            {%if post.timestamp > previous_read_time %}
+            <span class="badge"> NEW</span>
+            {% endif %}
+            <span class="pull-right" style="color:#8d95a5">{{ moment(post.timestamp).fromNow()}}</span>
+            <br>
+            <p style="white-space: pre-line;">{{ post.body }}</p>
+            <a href="{{ url_for('user.send_message', recipient=post.author.username) }}">Reply</a>
+            <span class="pull-right"><a href="{{ url_for('user.delete_message', message_id=post.id) }}">Delete</a></span>
+        </td>
+    </tr>
+
+

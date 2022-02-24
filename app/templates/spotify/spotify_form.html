@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block scripts %}
+{{super()}}
+<script type="text/javascript">
+    function testspotify(device) {
+
+        $.ajax({
+            url: '/test_spotify',
+            data: {
+                device: device
+            },
+            type: 'POST',
+            success: function(res) {
+                console.log(res);
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        $('#test').removeAttr("type").attr("type", "button");
+        $('#submit').addClass( "btn-primary" );
+        $('#test').on('click', function(e) {
+        var device = $("input[name=device]:checked").val();
+        testspotify(device);
+        });
+    });
+</script>
+{% endblock %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% block app_content %}
+<style>
+body {
+    background-color: #f0f3f4;
+}
+</style>
+<h2>Welcome, {{current_user.display_name.split()[0]}}!</h2>
+<p>With your Spotify Premium account, you can take control of your music directly from your browser. Spotify will play in the background.</p>
+
+<div class="panel panel-default">
+  <div class="panel-heading">Select Spotify Playback Device:</div>
+  <div class="panel-body">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-warning" role="alert">{{ message }}
+        </div>
+<p><a href="spotify:track:6cUCckpdlqHJ5Ascf2uH2A">Open the Spotify app <span class="glyphicon glyphicon-share" aria-hidden="true"></span> </a> in the background, <a href="https://open.spotify.com/" target="_blank">use the web player</a>, or open Spotify on another device you wish to play to.</a></p>
+<p><b>If Spotify is open:</b> Spotify may sometimes fall asleep. Go to the Spotify app and wake it by playing any track.</p>
+<hr>
+<a class="btn btn-primary" href="{{ url_for('spotify.connect_spotify') }}" role="button">Click to Try Again</a>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    {% with messages = get_flashed_messages() %}
+    {% if not messages %}
+<div class="row">
+    <div class="col-md-4">
+        {{ wtf.quick_form(form) }}
+        <br><b>Test</b> should play a brief jingle.
+    </div>
+</div>
+<hr>
+<p>Device not listed? Open Spotify on the device and <a href="{{ url_for('spotify.connect_spotify') }}">click here to try again.</a></p>
+Spotify open but <b>Test</b> has no audio? Spotify may sometimes fall asleep. Go to the Spotify app and wake it by playing any track.
+    {% endif %}
+    {% endwith %}
+  </div>
+</div>
+
+
+{% endblock %}

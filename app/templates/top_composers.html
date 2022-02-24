@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+<style>
+.container .jumbotron {
+    position: relative;
+    background: url("https://storage.googleapis.com/composer-explorer.appspot.com/headers/Piano.jpg") no-repeat center center;
+    background-size: cover;
+    color: white;
+    padding-bottom: 15px;
+    border-radius: 0px
+    border-radius: 6px ;
+
+}
+.jumbotron > .overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-image: linear-gradient(to bottom left, rgb(52,58,64, 0.4), rgb(52,58,64, 1));
+/*    background-color: rgb(52,58,64, 0.80);*/
+    z-index: 1;
+    border-radius: 6px ;
+}
+
+.jumbotron > .inner {
+    position: relative;
+    z-index: 2;
+}
+
+body{
+    background: #f1f2f4;
+}
+
+.rcorners{
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid #d4d7dd;
+  padding: 20px;
+  padding-bottom: 0px;
+  margin-bottom: 10px;
+}
+.numberCircle {
+    font-size: 32px;
+    padding-right: 12px;
+}
+
+.button-selected {
+  border: 1px solid;
+  border-color: #fff !important;
+}
+
+
+</style>
+
+
+
+<div class="jumbotron">
+    <div class="overlay"></div>
+    <div class="inner">
+    <h1>Top Composers</h1>
+    <h3></h3>
+    {% if users %}
+    <a class="btn btn-default filter-button back-button" href='/top_composers' type="button" id="previous_button">Recordings on Spotify</a>
+    <a class="btn btn-default filter-button back-button button-selected" href='/top_composers?users=1' type="button" id="previous_button">Voted by members</a>
+      {% else %}
+    <a class="btn btn-default filter-button back-button button-selected" href='/top_composers' type="button" id="previous_button">Recordings on Spotify</a>
+    <a class="btn btn-default filter-button back-button" href='/top_composers?users=1' type="button" id="previous_button">Voted by members</a>
+      {% endif %}
+</div>
+</div>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info" role="alert">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+{% set count = namespace(value=0) %}
+{% for composer in composers %}
+  <div class="rcorners">
+ <table class="table table-borderless table-condensed">
+   <tr>
+      <td style='text-align: center; vertical-align: middle;' width="50px";>
+       <div class="numberCircle">{{ ranking[count.value] }}</div>
+        {% set count.value = count.value + 1 %}
+      </td>
+      {% if users %}
+      <td width="85px">
+         <a href="{{ url_for('composer.composer_router', name=composer[0].name_short) }}">
+         <img class ="favorite-composer-img" src="{{config['STATIC']}}img/{{ composer[0].name_short }}.jpg" />
+         </a>
+      </td>
+      <td style="vertical-align:middle;">
+         <a href="{{ url_for('composer.composer_router', name=composer[0].name_short) }}">
+         <b>{{ composer[0].name_full }}</b>
+         </a>
+         <br>
+         {% if composer[1] == 1 %}
+         <b>{{ composer[1] }} person</b> has favorited
+         {% else %}
+         <b>{{ composer[1] }} people</b> have favorited
+         {% endif %}
+      </td>
+      {% else %}
+      <td width="85px">
+         <a href="{{ url_for('composer.composer_router', name=composer[0].composer) }}">
+         <img class ="favorite-composer-img" src="{{config['STATIC']}}img/{{ composer[0].composer }}.jpg" />
+         </a>
+      </td>
+      <td style="vertical-align:middle;">
+         <a href="{{ url_for('composer.composer_router', name=composer[0].composer) }}">
+         <b>{{ composer[0].composer }}</b>
+         </a>
+         <br>
+         <b>{{ '{:,}'.format(composer[1]) }}</b> album-works
+      </td>
+      {% endif %}
+   </tr>
+</table>
+  </div>
+
+{% endfor %}
+
+{% endblock %}

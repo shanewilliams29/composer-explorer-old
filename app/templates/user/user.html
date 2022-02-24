@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block app_content %}
+<style>
+body{
+    background: #f1f2f4;
+}
+</style>
+<div class="panel panel-default">
+   <div class="panel-heading">
+      <h2><img class="user-page-avatar" src="{{ user.avatar(48) }}">&nbsp;<b> {{ user.display_name }}</b></h2>
+   </div>
+   <div class="panel-body">
+      {% if user.admin %}<p style="color:goldenrod;"><b>Site Administrator</b></p>{% endif %}
+      {% if user.about_me %}
+      <p>{{ user.about_me }}</p>
+      {% endif %}
+      {% if user.last_seen %}
+      <p>Last seen on: {{ moment(user.last_seen).format('LLL') }}</p>
+      {% endif %}
+   </div>
+</div>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-info" role="alert">{{ message }}</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+<div class="panel panel-default">
+   <div class="panel-heading">
+      <h3 class="panel-title">Messages</h3>
+   </div>
+   <div class="panel-body">
+      {% if user == current_user %}
+      <p><a href="{{ url_for('user.messages') }}"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>&nbsp;&nbsp;View your messages</a></p>
+      {% else %}
+      <p><a href="{{ url_for('user.send_message', recipient=user.username) }}"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>&nbsp;&nbsp;Send private message</a></p>
+      {% endif %}
+   </div>
+</div>
+{% if user == current_user %}
+<div class="panel panel-default">
+   <div class="panel-heading">
+      <h3 class="panel-title">Control Panel</h3>
+   </div>
+   <div class="panel-body">
+      <p><a href="{{ url_for('user.edit_profile') }}"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>&nbsp;&nbsp;Edit your profile</a></p>
+      <p><a href="{{ url_for('user.change_avatar') }}"><span class="glyphicon glyphicon-picture" aria-hidden="true"></span>&nbsp;&nbsp;Change profile picture</a></p>
+      <p><a href="{{ url_for('user.clear_visits') }}"><span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>&nbsp;&nbsp;Clear visited works</a></p>
+      {% if session['premium'] %}
+      <p><a href="{{ url_for('spotify.connect_spotify') }}"><span class="glyphicon glyphicon-music" aria-hidden="true"></span>&nbsp;&nbsp;Change Spotify device</a></p>
+      {% endif %}
+   </div>
+</div>
+<div class="panel panel-default">
+   <div class="panel-heading">
+      <h3 class="panel-title">Log Out</h3>
+   </div>
+   <div class="panel-body">
+      <p><a href="{{ url_for('auth.logout') }}"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>&nbsp;&nbsp;Log out</a></p>
+   </div>
+</div>
+{% endif %}
+
+<!-- <div class="panel panel-default">
+   <div class="panel-heading">
+      <h3 class="panel-title">User Statistics</h3>
+   </div>
+   <div class="panel-body">
+      <div class="col-lg-6 col-md-6 d-flex align-items-stretch mt-4 mt-md-0">
+         Forum Posts:
+         {{ forum_posts }}
+      </div>
+      <div class="col-lg-6 col-md-6 d-flex align-items-stretch mt-4 mt-md-0">
+         Album Page Comments:
+         {{ comments }}
+      </div>
+   </div>
+</div> -->
+
+{% if composers %}
+<div class="panel panel-default">
+   <div class="panel-heading">
+      {% if user.display_name[-1] == "s" %}
+      <h3 class="panel-title">{{user.display_name}}' Favorite Composers</h3>
+      {% else %}
+      <h3 class="panel-title">{{user.display_name}}'s Favorite Composers</h3>
+      {% endif %}
+   </div>
+   <div class="panel-body">
+      {% for composer in composers %}
+      <div class="col-lg-6 col-md-6 d-flex align-items-stretch mt-4 mt-md-0">
+         <div class="rcorners">
+            {% include 'user/_usercomposer.html' %}
+         </div>
+      </div>
+      {% endfor %}
+   </div>
+</div>
+{% endif %}
+
+{% if likes %}
+<div class="panel panel-default">
+   <div class="panel-heading">
+      <h3 class="panel-title">Recently liked by {{user.display_name}}</h3>
+   </div>
+   <div class="panel-body">
+      {% for album in likes %}
+      <div class="col-lg-6 col-md-6 d-flex align-items-stretch mt-4 mt-md-0">
+         <div class="rcorners">
+            {% include 'user/_userlikes.html' %}
+         </div>
+      </div>
+      {% endfor %}
+   </div>
+</div>
+{% endif %}
+
+
+{% endblock %}

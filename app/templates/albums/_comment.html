@@ -1,0 +1,21 @@
+
+    <tr>
+        <td width="43px">
+            <a href="{{ url_for('user.user', username=post.author.username) }}">
+                <img class="user-comment-avatar" src="{{ post.author.avatar(30)}}" />
+            </a>
+        </td>
+        <td>
+            <b><a href="{{ url_for('user.user', username=post.author.username) }}">
+            {{ post.author.display_name }}</a></b>
+            <span class="pull-right" style="color:#8d95a5">{{ moment(post.timestamp).fromNow()}}</span>
+            <br>
+            <p style="white-space: pre-line;">{{ post.body }}</p>
+            {% if current_user.is_authenticated %}
+            {% if current_user == post.author or current_user.username == current_app.config['ADMIN_NAME']%}
+            <a class="pull-right" style="color:#8d95a5" href="{{ url_for('albums.delete_comment', post_id=post.id) }}">Delete</a>
+            {% endif %}
+            {% endif %}
+        </td>
+    </tr>
+

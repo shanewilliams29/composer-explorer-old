@@ -1,0 +1,27 @@
+<div class="modal fade" id="createplaylistmodal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title"><b>Add to Spotify Playlist</b></h5>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="/playlist_add" method="get" name="playlistform">
+          <div class="form-group">
+            <label for="exampleFormControlSelect1">Add to Existing Playlist</label>
+            <select class="form-control" name="existing-playlist" id="existing-playlist">
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="exampleFormControlInput1">Create New Playlist</label>
+            <input type="text" class="form-control" name="new-playlist" id="new-playlist" placeholder="Playlist Name">
+            <input type="hidden" id="tracks" name="tracks" value="1">
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-success">Submit to Spotify</button></form>
+      </div>
+    </div>
+  </div>
+</div>

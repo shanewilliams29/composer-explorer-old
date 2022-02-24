@@ -1,0 +1,18 @@
+<div class="rcorners">
+ <table class="table table-borderless table-condensed">
+   <tr>
+      <td width="85px">
+         <a href="{{ url_for('albums.albums', work_id=album.work_id) }}">
+         <img class ="top-album-img" src="{{album.album_img}}" />
+         </a>
+      </td>
+      <td style="vertical-align:middle;">
+         <a href="{{ url_for('albums.albums', work_id=album.work_id) }}">
+         <b>{{ album.artists }}</b>
+         </a>
+         <br>
+         {{ album.composer }}: {{ album.work }}
+      </td>
+   </tr>
+</table>
+  </div>

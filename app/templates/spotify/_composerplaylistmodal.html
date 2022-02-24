@@ -1,0 +1,34 @@
+<div class="modal fade" id="composerplaylistmodal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title"><b>Composer Playlist Generator</b></h5>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Use this form to generate a playlist consisting of a random selection of works for {{works[0].composer}}.</p>
+        <form action="/composer_playlist" method="get" name="playlistform">
+          <div class="form-group">
+            <label for="exampleFormControlInput1">Playlist name</label>
+            <input type="text" class="form-control" name="name" id="new-playlist" value="A Taste of {{works[0].composer}}" required>
+            <input type="hidden" id="composer" name="composer" value="{{works[0].composer}}">
+          </div>
+          <div class="form-group">
+<label for="popularity">Work Grouping</label><br>
+<label class="radio-inline"><input type="radio" value="tracks" name="grouping" checked>Random movements</label>
+<label class="radio-inline"><input type="radio" value="works" name="grouping">Complete Works</label><br><br>
+<label for="popularity">Popularity</label><br>
+<label class="radio-inline"><input type="radio" value="all" name="popularity" checked>All Works</label>
+<label class="radio-inline"><input type="radio" value="recommend" name="popularity">Most Recommended</label>
+<label class="radio-inline"><input type="radio" value="obscure" name="popularity">Less Popular</label><br><br>
+<label for="popularity">Operas</label><br>
+<label class="checkbox-inline"><input type="checkbox" name="operas" value="True">Include Operas</label>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-success">Generate Playlist</button></form>
+      </div>
+    </div>
+  </div>
+</div>

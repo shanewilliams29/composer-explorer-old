@@ -1,0 +1,37 @@
+<div class="modal fade" id="composerModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <img alt="Photo" class="modalflag" src="">
+                <h4 class="modal-title" id="composer-header">Modal Header</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row composerrow">
+                    <div class="col-sm-12 col-md-3">
+                        <img alt="Photo" class="composerphoto" src=""></p>
+                    </div>
+                    <div class="col-sm-12 col-md-9 biocontainer">
+                        <span>
+                        <p class="section bio" id="composerbio">This is a modal dialog!</p>
+                        <span><a href="" target="_blank" id="wikilink">Wikipedia</a></span>
+                    </div>
+                </div>
+                <div id="favorite-success" class="alert alert-info">
+                    Message
+                </div>
+                <div id="favorite-fail" class="alert alert-danger">
+                    Log in with your Spotify account to add composers to your favorites.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick='' type="button" id="previous_button"><span class="glyphicon glyphicon-chevron-left"></span></button>
+                <button class="btn btn-secondary" onclick='' type="button" id="next_button"><span class="glyphicon glyphicon-chevron-right"></span></button>
+                <button type="button"  onclick='' id="fav_button" class="btn btn-warning"><span class="glyphicon glyphicon-star"></span></button>
+                <a type="button" id="explore_button" class="btn btn-primary">Explore</a>
+                <a type="button" id="album_button" class="btn btn-primary">Albums</a>
+                <a type="button" id="loading_button" class="btn btn-primary"><img class="loadinggif" src="static/three-dots.svg"></a>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

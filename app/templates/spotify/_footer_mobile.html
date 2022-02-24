@@ -1,0 +1,197 @@
+<style>
+.footertableclass{
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.footertable {
+  border: 0px solid #e3e6e8;
+  text-align: center;
+  padding: 3px;
+  vertical-align: middle;
+
+}
+
+.controls{
+    text-align: center !important;
+}
+
+.autoplay{
+    text-align: right !important;
+}
+
+.slidecontainer {
+  width: 100%;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  background: #6a7682;
+  outline: none;
+  opacity: 0.8;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.playback-button{
+ margin: 0px !important;
+}
+
+.title{
+    vertical-align: bottom;
+    height: 45px;
+}
+
+#composition-play{
+    font-size: 12px;
+}
+
+
+.album-play-pic{
+  /*margin-top: 4px;*/
+  height: 20px;
+  object-fit: cover;
+  width: 20px;
+  padding: 0px !important;
+}
+
+.footertable
+{
+  height: 30px;
+}
+#controls-form{
+  margin: 0px !important;
+}
+
+.autoplay{
+    font-size: 12px;
+}
+
+.regular-checkbox{
+    filter: grayscale(1);
+}
+
+/*mobile button select color*/
+button:hover {
+  background-color: rgb(52, 58, 64, 1)!important;
+  border: none;
+  color: white!important;
+  margin-bottom: 8px;
+  margin-top: 8px;
+}
+
+
+</style>
+{% if session['premium'] %}
+<div class="footer navbar-fixed-bottom">
+    <div class="container">
+  <table class="footertableclass">
+    <tr class=""><td class="footertable" width="100%">
+    <img id="album-img-playback" class="album-play-pic" src="" hidden>&nbsp
+    <span id="composition-play"></span>
+    </td></tr>
+    </table>
+  <table class="footertableclass">
+    <tr>
+    <td class="footertable" width="15%"><span id="time-progress">00:00</span></td>
+    <td class="footertable" width="70%">
+        <div class="slidecontainer">
+            <input type="range" min="0" max="100" value="0" class="slider" id="progressbar" oninput="holdrange(this.value)" onchange="seekspotify(this.value)">
+        </div>
+    </td>
+    <td class="footertable" width="15%"><span id="time-duration">00:00</span></td>
+  </tr>
+  </table>
+<table class="footertableclass">
+  <tr>
+<td class="footertable controls" width="25%"></td>
+
+    <td class="footertable controls" width="50%">
+        <form id = "controls-form">
+            <button id="previous-btn" type="button" onclick="previousspotify()" class="btn btn-default filter-button playback-button"> <span id="next" class="glyphicon glyphicon-step-backward"> </span></button>
+            <button id="play-btn" type="button" onclick="unpausespotify()" class="btn btn-default filter-button playback-button" hidden> <span id="pauseplay" class="glyphicon glyphicon-play"> </span></button>
+            <button id="pause-btn" type="button" onclick="unplayspotify()" class="btn btn-default filter-button playback-button"> <span id="pauseplay" class="glyphicon glyphicon-pause"> </span></button>
+            <button id="next-btn" type="button" onclick="nextspotify()" class="btn btn-default filter-button playback-button"> <span id="next" class="glyphicon glyphicon-step-forward"> </span></button>
+        </form>
+    </td>
+<td class="footertable autoplay" width="25%">
+
+                <label class="checkbox-inline">
+                {% if autoplay: %}
+                <input type="checkbox" class="regular-checkbox" id="autoplay" name="autoplay" value="True" checked>Autoplay
+                {% endif %}
+                {% if not autoplay: %}
+                <input type="checkbox" class="regular-checkbox" id="autoplay" name="autoplay" value="True">Autoplay
+                {% endif %}
+                </label>
+    </td>
+  </tr>
+</table>
+</div>
+</div>
+{% else %}
+<div class="footer navbar-fixed-bottom">
+    <div class="container">
+  <table class="footertableclass">
+    <tr class=""><td class="footertable" width="100%">
+<span id="composition-play">Log in with your Spotify Premium account to play full tracks</span>
+    </td></tr>
+    </table>
+  <table class="footertableclass">
+    <tr>
+    <td class="footertable" width="15%"><span id="time-progress">00:00</span></td>
+    <td class="footertable" width="70%">
+        <div class="slidecontainer">
+            <input type="range" min="0" max="30000" value="0" class="slider" id="progressbar" oninput="holdrange(this.value)" onchange="seekpreview(this.value)">
+        </div>
+    </td>
+    <td class="footertable" width="15%"><span id="time-duration">00:30</span></td>
+  </tr>
+  </table>
+<table class="footertableclass">
+  <tr>
+<td class="footertable controls" width="25%"></td>
+
+    <td class="footertable controls" width="50%">
+        <form id = "controls-form">
+
+            <button id="play-btn" type="button" onclick="resumespotifypreview()" class="btn btn-default filter-button playback-button"> <span id="pauseplay" class="glyphicon glyphicon-play"> </span></button>
+            <button id="pause-btn" type="button" onclick="pausespotifypreview()" class="btn btn-default filter-button playback-button"> <span id="pauseplay" class="glyphicon glyphicon-pause"> </span></button>
+
+        </form>
+    </td>
+<td class="footertable autoplay" width="25%">
+
+
+    </td>
+  </tr>
+</table>
+</div>
+</div>
+{% endif %}

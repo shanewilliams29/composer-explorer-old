@@ -1,0 +1,37 @@
+{% extends 'bootstrap/base.html' %}
+{% from "bootstrap/pagination.html" import render_pagination %}
+{% block head %}
+{{super()}}
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<meta name="description" content="Portal for Classical music streaming on Spotify.">
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('static', filename='custom.css')}}">
+<link rel="stylesheet" href="{{url_for('static', filename='boxicons/css/boxicons.min.css')}}">
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="{{url_for('static', filename='mainpage.js')}}"></script>
+    {{ moment.include_moment() }}
+{% endblock %}
+
+{% block title %}
+    {% if title %}{{ title }} - Composer Explorer{% else %}Welcome to Composer Explorer{% endif %}
+{% endblock %}
+
+{% block navbar %}
+<!-- {% include '_patreon.html' %} -->
+<nav class="navbar navbar-inverse">
+{% include '_navbar.html' %}
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+{% block app_content %}{% endblock %}
+</div>
+{% include '_alertmodal.html' %}
+{% endblock %}

@@ -1,0 +1,208 @@
+{% extends "base_wide.html" %}
+{% block scripts %}
+{{super()}}
+<script src = "https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"> </script>
+<script src="{{url_for('static', filename='tooltip.js')}}"></script> <!-- For fixing tooltip on SVG -->
+<script type="text/javascript">
+   $('#composerModal').on('hidden.bs.modal', function(e) {
+       pausespotify();
+   });
+</script>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<script type="text/javascript">
+   $(document).ready(function() {
+       $('#simple-message').html("Success! Your playlist mix has been added to Spotify.");
+       $('#simple-modal').modal('show');
+   });
+
+</script>
+{% endfor %}
+{% endif %}
+{% endwith %}
+{% endblock %}
+{% block app_content %}
+<style>
+{% if request.MOBILE %}
+td {
+
+   height: 30px;
+   padding: 3px;
+   vertical-align: middle;
+   border-top: 1px dotted lightgray;
+}
+{% else %}
+td {
+
+   height: 15px;
+   padding: 3px;
+   vertical-align: middle;
+   border-top: 1px dotted lightgray;
+}
+{% endif %}
+
+
+table{
+   width: 100%;
+   border-collapse: separate;
+}
+body{
+    background: #f1f2f4;
+}
+h3.panel-title{
+  margin-top: 0px !important;
+  font-weight: bold;
+}
+div[role="tab"]:hover {
+  cursor: pointer;
+}
+div[aria-expanded=false]  .glyphicon-chevron-up {
+   display: none;
+}
+div[aria-expanded=true] .glyphicon-chevron-down {
+   display: none;
+}
+.panel-body{
+   padding-top:  0px;
+   padding-bottom: 5px;
+}
+.panel{
+   margin-bottom: 5px;
+}
+.equal {
+    display: -webkit-flex;
+    display: flex;
+}
+h5{
+   margin-top: 20px;
+   margin-bottom: 0px;
+   text-align:  center;
+}
+{% if request.MOBILE %}
+.container-fluid{
+   overflow-x: hidden;
+}
+h3.panel-title{
+  max-height: 999999px;
+}
+h5{
+    max-height: 999999px;
+}
+{% endif %}
+</style>
+
+
+<div class="composer-title">
+   <div class="col-md-6 col-xs-12 col-md-push-3 col-lg-push-3 title-column2 text-center">
+      <img class="composer-page-photo" src="{{ config['STATIC'] + composer.flagimg }}">
+      <img class="composer-page-photo" src="{{config['STATIC'] + 'img/' + composer.name_short }}.jpg"><span class="composer-page-title">{{composer.name_short}}</span>
+   </div>
+   <div class="container">
+      <div class="col-md-3 col-xs-6 col-md-pull-6 col-lg-pull-6 title-column1">
+         <div class="btn-group">
+            <a type="button" href="/" class="btn btn-default filter-button composer-button"> Main </a>
+         </div>
+         <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle filter-button composer-button" data-toggle="dropdown"> Filter <span class="caret"></span> </button>
+            <ul class="dropdown-menu">
+               <li><a href="?filter=playable">Playable</a></li>
+               <li><a href="?filter=recommended">Most Recommended</a></li>
+               <li><a href="?filter=all">All</a></li>
+            </ul>
+         </div>
+         <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle filter-button composer-button" data-toggle="dropdown"> View <span class="caret"></span> </button>
+            <ul class="dropdown-menu">
+               <li><a href="/composer/{{composer.name_short}}">Timeline</a></li>
+               <li><a href="/composerpanels/{{composer.name_short}}">Tables</a></li>
+            </ul>
+         </div>
+      </div>
+      <div class="col-md-3 col-xs-6 title-column3">
+         {% if current_user.is_authenticated %}
+         <button type="button" onclick="createComposerPlaylist();"  class="btn btn-success" id="spotify-button2">Create Playlist</button>
+         {% else %}
+         <button type="button" onclick="notLoggedIn();"  class="btn btn-success" id="spotify-button2">Create Playlist</button>
+         {% endif %}
+      </div>
+   </div>
+</div>
+
+{% if filter_method == 'recommended' %}
+<h5><b>Recommended Works</b> | <a href="?filter=playable">Show all playable works</a></h5>
+{% elif filter_method == 'playable'%}
+<h5><b>All Playable Works</b> | <a href="?filter=recommended">Show recommended works</a></h5>
+{% else %}
+<h5><b>All Catalogued Works</b></h5>
+{% endif %}
+
+<br>
+{% if request.MOBILE %}<div class="container-fluid">{% else %}<div class="container">{% endif %}
+
+<div class ="row">
+{% for work1 in works %}
+{% if loop.previtem %}
+   {% if work1.genre != loop.previtem.genre %}
+   {% if work1.genre == median_work_genre %}
+   </div>
+   <div class="col-md-6">
+   {% endif %}
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" data-toggle="collapse" aria-expanded="{% if filter_method == 'recommended' %}true{% else %}false{% endif %}" data-target="#{{ work1.id}}">
+          <h3 class="panel-title">{{work1.genre}}<span class="glyphicon glyphicon-chevron-down pull-right"></span><span class="glyphicon glyphicon-chevron-up pull-right"></span></h3>
+        </div>
+        <div class="panel-body collapse {% if filter_method == 'recommended' %}in{% endif %}" id="{{work1.id}}">
+        <table>
+        {% for work2 in works %}{% if work2.genre == work1.genre %}
+           <tr>
+             <td width="15%"><span style="white-space: nowrap; color:darkred;">{% if work2.id in visitlist %}{{work2.cat}} ✔{% else %}{{work2.cat}}{% endif %}</span></td>
+               {% if filter_method == "all" and work2.id not in catalogued %}
+                  <td width="80%" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:1px;"><span style="color:darkgrey;">{{work2.title}}</span><span style="color:darkgrey;">{% if work2.nickname %} · {{work2.nickname}}{% endif %}</span></td>
+               {% else %}
+                  <td width="80%" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:1px;"><a onclick='requestwork("{{ work2.id }}")' style="cursor: pointer; color:black;">{{work2.title}}</a><span style="color:gray;">{% if work2.nickname %} · {{work2.nickname}}{% endif %}</span></td>
+               {% endif %}
+            <td width="5%" style="text-align: right;"><span class="badge">{{work2.album_count}}</span></td>
+           </tr>
+         {% endif %}{% endfor %}
+        </table>
+        </div>
+      </div>
+   {% endif %}
+{% else %}
+   <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" data-toggle="collapse" aria-expanded="{% if filter_method == 'recommended' %}true{% else %}false{% endif %}" data-target="#{{ work1.id}}">
+          <h3 class="panel-title">{{work1.genre}}<span class="glyphicon glyphicon-chevron-down pull-right"></span><span class="glyphicon glyphicon-chevron-up pull-right"></span></h3>
+        </div>
+        <div class="panel-body collapse {% if filter_method == 'recommended' %}in{% endif %}" id="{{work1.id}}">
+        <table>
+        {% for work2 in works %}{% if work2.genre == work1.genre %}
+           <tr>
+             <td width="15%"><span style="white-space: nowrap; color:darkred;">{% if work2.id in visitlist %}{{work2.cat}} ✔{% else %}{{work2.cat}}{% endif %}</span></td>
+               {% if filter_method == "all" and work2.id not in catalogued %}
+                  <td width="80%" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:1px;"><span style="color:darkgrey;">{{work2.title}}</span><span style="color:darkgrey;">{% if work2.nickname %} · {{work2.nickname}}{% endif %}</span></td>
+               {% else %}
+                  <td width="80%" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden; max-width:1px;"><a onclick='requestwork("{{ work2.id }}")' style="cursor: pointer; color:black;">{{work2.title}}</a><span style="color:gray;">{% if work2.nickname %} · {{work2.nickname}}{% endif %}</span></td>
+               {% endif %}
+            <td width="5%" style="text-align: right;"><span class="badge">{{work2.album_count}}</span></td>
+           </tr>
+        {% endif %}{% endfor %}
+        </table>
+        </div>
+      </div>
+{% endif %}
+{% endfor %}
+</div>
+</div>
+</div>
+{% for work in works %}
+   {% if work.id in catalogued %}
+   <a href="/albums/{{ work.id }}" hidden>{{ work.title }}</a>
+   {% endif %}
+{% endfor %}
+{% include 'spotify/_composerplaylistmodal.html' %}
+{% include 'spotify/_getspotifymodal.html' %}
+{% include '_alertmodal.html' %}
+{% include '_simplemodal.html' %}
+{% endblock %}

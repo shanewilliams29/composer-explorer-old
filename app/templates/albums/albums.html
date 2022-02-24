@@ -1,0 +1,659 @@
+{% import 'bootstrap/wtf.html' as wtf %}
+{% extends "base.html" %}
+{% block scripts %}
+{{super()}}
+<script src="/static/typeahead.bundle.js"></script>
+<script src = "https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"> </script>
+
+{% if request.MOBILE %}
+<script>
+function openNav() {
+    document.getElementById("mySidenav").style.width = "100%";
+}
+</script>
+{% else %}
+<script>
+function openNav() {
+    document.getElementById("mySidenav").style.width = "450px";
+}
+</script>
+{% endif %}
+
+{% if session['premium'] %}
+<script>
+$(function() {
+    $('[data-toggle="popover"]').popover()
+})
+
+function areyouplaying() {
+    $.ajax({
+        url: '/are_you_playing',
+        type: 'GET',
+        success: function(res) {
+            response = JSON.parse(res);
+            track = response[0];
+            progress = parseInt(response[1]);
+            duration = parseInt(response[2]);
+            title = response[3];
+            img = response[4];
+
+            $(".album-font-link").removeClass("trackselect");
+            $("." + track).addClass("trackselect");
+
+            setplayback(progress, duration)
+            time = progress;
+            suspend = false;
+
+            $('#composition-play').text(title);
+
+            $('#album-img-playback').attr("src", img);
+
+            $('#album-img-playback').removeAttr('hidden');
+            $('#play-btn').hide();
+            $('#pause-btn').show();
+        },
+        error: function(error) {
+            console.log(error);
+            $('#play-btn').show();
+            $('#pause-btn').hide();
+        }
+    });
+}
+
+function playtrack(id) {
+    id = id
+    var firstWord = id.replace(/ .*/, '');
+    var trackid = firstWord.replace("spotify:track:", "");
+    $.ajax({
+        url: '/play_track',
+        data: {
+            id: id
+        },
+        type: 'POST',
+        success: function(res) {
+            $(".album-font-link").removeClass("trackselect");
+            $("." + trackid).addClass("trackselect");
+            setplayback(0, res);
+            time = 0;
+            suspend = false;
+            setTimeout(function() {
+                areyouplaying();
+            }, 500);
+            console.log(res);
+        },
+        error: function(error) {
+            $('#alert-message').html(error.responseText);
+            $('#alert-modal').modal('show');
+        }
+    });
+}
+
+function nextspotify() {
+    $.ajax({
+        url: '/next_track',
+        type: 'GET',
+        success: function(res) {
+            setplayback(0, res);
+            time = 0;
+            suspend = false;
+            setTimeout(function() {
+                areyouplaying();
+            }, 500);
+            console.log(res);
+        },
+        error: function(error) {
+            console.log(error)
+        }
+    });
+}
+
+function previousspotify() {
+    $.ajax({
+        url: '/previous_track',
+        type: 'GET',
+        success: function(res) {
+            setplayback(0, res);
+            time = 0;
+            suspend = false;
+            setTimeout(function() {
+                areyouplaying();
+            }, 500);
+            console.log(res);
+        },
+        error: function(error) {
+            console.log(error)
+        }
+    });
+}
+
+function seekspotify(position) {
+    $.ajax({
+        url: '/seek_track',
+        data: {
+            position: position
+        },
+        type: 'POST',
+        success: function(res) {
+            time = parseInt(position);
+            suspend = false;
+            setTimeout(function() {
+                areyouplaying();
+            }, 500);
+            console.log(res);
+        },
+        error: function(error) {
+            console.log(error)
+        }
+    });
+}
+
+function unplayspotify() {
+    $('#play-btn').show();
+    $('#pause-btn').hide();
+    $.ajax({
+        url: '/unplay_spotify',
+        type: 'POST',
+        success: function(res) {
+            suspend = true;
+        },
+        error: function(error) {
+            console.log(error);
+        }
+    });
+}
+
+function unpausespotify() {
+    $('#play-btn').hide();
+    $('#pause-btn').show();
+    $.ajax({
+        url: '/unpause_spotify',
+        type: 'POST',
+        success: function(res) {
+            suspend = false;
+        },
+        error: function(error) {
+            console.log(error);
+        }
+    });
+}
+</script>
+{% endif %}
+
+<script>
+
+function closeNav() {
+    document.getElementById("mySidenav").style.width = "0";
+}
+
+function setplayback(value, duration) {
+    $('#progressbar').prop({
+        'min': 0,
+        'max': duration,
+        'value': value
+    });
+}
+
+function playpreviewtrack(id) {
+    $.ajax({
+        url: '/play_spotify_preview_track',
+        data: {
+            id: id
+        },
+        type: 'POST',
+        success: function(res) {
+            suspend = false;
+            duration = 30 * 1000;
+            time = 0;
+            title = $('.'+id+'').text()
+            $('#time-progress').text("00:00");
+            $('#progressbar').prop({
+                'value': 0
+            });
+            $('#play-btn').hide();
+            $('#pause-btn').show();
+            preview_audio(res);
+            $(".album-font-link").removeClass("trackselect");
+            $("." + id).addClass("trackselect");
+            $('#composition-play').text(title);
+        },
+        error: function(error) {
+            $('.' + id).popover('show');
+            setTimeout(function() {
+                $('.' + id).popover('hide');
+            }, 2000);
+        }
+    });
+}
+
+function resumespotifypreview() {
+    var x = document.getElementById("preview_audio");
+    $('#play-btn').hide();
+    $('#pause-btn').show();
+    if (time >= duration){
+        time = 0;
+    }
+    suspend = false;
+    x.play();
+}
+
+function pausespotifypreview() {
+    var x = document.getElementById("preview_audio");
+    x.pause();
+    suspend = true;
+    $('#play-btn').show();
+    $('#pause-btn').hide();
+}
+
+function seekpreview(position) {
+    var x = document.getElementById("preview_audio");
+    x.currentTime = position / 1000;
+    time = parseInt(position);
+    resumespotifypreview()
+}
+
+function holdrange(time) {
+    suspend = true;
+    var displaytime = msToHMS(time);
+    $('#time-progress').text(displaytime);
+}
+
+function msToHMS(duration) {
+    var milliseconds = parseInt((duration % 1000) / 100),
+        seconds = parseInt((duration / 1000) % 60),
+        minutes = parseInt((duration / (1000 * 60)) % 60),
+        hours = parseInt((duration / (1000 * 60 * 60)) % 24);
+    hours = (hours < 10) ? "0" + hours : hours;
+    minutes = (minutes < 10) ? "0" + minutes : minutes;
+    seconds = (seconds < 10) ? "0" + seconds : seconds;
+    return minutes + ":" + seconds;
+}
+
+var time = 0,
+    suspend = true,
+    duration = 0;
+    title = "";
+
+$(document).ready(function() {
+    $('#play-btn').show();
+    $('#pause-btn').hide();
+
+    {% if playfirsttrack %}
+        playtrack('{{tracks[0].firstfive[0][2]}}')
+    {% endif %}
+
+    {% if session['premium'] %}
+        setTimeout(function(){
+            areyouplaying();
+        }, 500);
+    {% endif %}
+
+    $('.showmore').on('click', function(){
+        $(this).html() == "Show less" ? $(this).html('Show more') : $(this).html('Show less');
+    });
+
+    $('#autoplay').on('change', function() {
+        var val = this.checked ? this.value : '';
+        $.ajax({
+            url: '/autoplay',
+            data: {
+                value: val
+            },
+            type: 'POST',
+            success: function(res) {
+                console.log(res);
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    });
+
+    var timer = setInterval(function() {
+        {% if session['premium'] %}
+            correction = 0;
+        {% else %}
+            correction = 1000;
+        {% endif %}
+        if(!suspend) { // Check it
+            $('#progressbar').prop({
+                'value': time + correction
+            });
+            var displaytime = msToHMS(time + correction);
+            var displayduration = msToHMS(duration);
+            $('#time-progress').text(displaytime);
+            $('#time-duration').text(displayduration);
+            time = time + 1000;
+            if(time >= duration) {
+                $('#time-progress').text(msToHMS(duration));
+                $('#progressbar').prop({
+                    'value': duration
+                });
+                suspend = true;
+                {% if session['premium'] %}
+                    setTimeout(function() {
+                        areyouplaying();
+                    }, 1000);
+                {% else %}
+                    $('#play-btn').show();
+                    $('#pause-btn').hide();
+                {% endif %}
+            }
+        }
+    }, 1000);
+});
+
+// Removes focus of the playback buttons.
+$(".btn").click(function(event) {
+    $(this).blur();
+});
+</script>
+
+<script>
+// Artist typeahead
+var substringMatcher = function(strs) {
+  return function findMatches(q, cb) {
+    var matches, substringRegex;
+
+    // an array that will be populated with substring matches
+    matches = [];
+
+    // regex used to determine if a string contains the substring `q`
+    substrRegex = new RegExp(q, 'i');
+
+    // iterate through the pool of strings and for any string that
+    // contains the substring `q`, add it to the `matches` array
+    $.each(strs, function(i, str) {
+      if (substrRegex.test(str)) {
+        matches.push(str);
+      }
+    });
+
+    cb(matches);
+  };
+};
+
+var artists = [
+            {% for artist in artists %}
+            '{{artist[0].name}}',
+            {% endfor %}
+];
+
+$('.typeahead')
+.typeahead({
+  hint: true,
+  highlight: true,
+  minLength: 1
+},
+{
+  name: 'artists',
+  source: substringMatcher(artists),
+  limit: 10,
+})
+.on('typeahead:selected', function(e){
+    e.target.form.submit();;
+});
+</script>
+
+{% endblock %}
+{% block app_content %}
+
+<style>
+.twitter-typeahead, .tt-hint, .tt-input, .tt-menu { width: 100%; }
+
+.tt-query {
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+     -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+
+.tt-hint {
+  color: #999
+}
+
+.tt-menu {    /* used to be tt-dropdown-menu in older versions */
+  margin-top: 4px;
+  padding: 4px 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  -webkit-border-radius: 4px;
+     -moz-border-radius: 4px;
+          border-radius: 4px;
+  -webkit-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+     -moz-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+          box-shadow: 0 5px 10px rgba(0,0,0,.2);
+}
+
+.tt-suggestion {
+  padding: 3px 20px;
+  line-height: 24px;
+}
+
+.tt-suggestion.tt-cursor,.tt-suggestion:hover {
+  color: #fff;
+  background-color: #007bff;
+  cursor: pointer;
+
+}
+
+
+.container .jumbotron {
+    position: relative;
+    background: url("{{imgurl}}") no-repeat center center;
+    background-size: cover;
+    color: white;
+    padding-bottom: 15px;
+    border-radius: 0px;
+    border-radius: 6px ;
+
+}
+.jumbotron > .overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-image: linear-gradient(to bottom left, rgb(52,58,64, 0.4), rgb(52,58,64, 1));
+/*    background-color: rgb(52,58,64, 0.80);*/
+    z-index: 1;
+    border-radius: 6px ;
+}
+
+.jumbotron > .inner {
+    position: relative;
+    z-index: 2;
+}
+
+
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 9999;
+    top: 0;
+    right: 0;
+    background-color: #fff;
+    overflow-x: hidden;
+    padding-top: 60px;
+}
+
+.sidenav {
+    color: #000;
+    display: block;
+    padding: 0px;
+}
+
+.sidenav a:hover, .offcanvas a:focus{
+    color: #007bff;
+}
+
+.sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+.sidebarcontainer{
+    padding: 15px;
+}
+.rcorners{
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid #d4d7dd;
+  padding: 20px;
+  padding-bottom: 0px;
+  margin-bottom: 10px;
+}
+
+body{
+    background: #f1f2f4;
+}
+
+.albumheader{
+    margin-bottom: 2px;
+    padding-left: 4px;
+}
+
+.popover{
+    color: #000;
+}
+</style>
+
+<div id="mySidenav" class="sidenav">
+<div class="sidebarcontainer">
+<h3>Comments</h3>
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+{{ wtf.quick_form(form) }}
+<table class="table table-hover">
+<br>
+{% for post in posts %}
+ {% include 'albums/_comment.html' %}
+{% endfor %}
+</table>
+</div>
+</div>
+
+<div class="jumbotron">
+    <div class="overlay"></div>
+    <div class="inner">
+    <h1>{{ work.composer}}</h1>
+<!--     <hr class="my-4"> -->
+    <h3>{{work.title}}{% if work.cat %}, {{work.cat}}{% endif %} ({{work.date}})</h3>
+    {% if not request.MOBILE %}
+    <a class="btn btn-default filter-button back-button" href='/albums/{{previouswork}}' type="button" id="previous_button"><span class="glyphicon glyphicon-chevron-left"></span></a>
+    {% endif %}
+    <div class="btn-group">
+        <a type="button" href="/composer_router/{{work.composer}}" class="btn btn-default filter-button back-button"> {{ work.composer}}</a>
+    </div>
+    <a class="btn btn-default filter-button back-button" data-toggle="popover" data-trigger="hover" data-placement="top" data-content="About this work" onclick='wikiwork("{{work.composer}} {{work.title}} {{work.cat}}")' type="button" id="wikibutton"><span class="glyphicon glyphicon glyphicon-info-sign"></span></a>
+    <a class="btn btn-default filter-button back-button" data-toggle="popover" data-trigger="hover" data-placement="top" data-content="Sheet music" href="https://duckduckgo.com/?q=!ducky+IMSLP {{work.composer}} {{work.title}} {{work.cat}}" target="_blank" type="button" id="imslpbutton"><span class="glyphicon glyphicon glyphicon glyphicon-file"></span></a>
+    {% if work.genre == "Opera" %}
+    <a class="btn btn-default filter-button back-button" data-toggle="popover" data-trigger="hover" data-placement="top" data-content="Libretto" href="https://duckduckgo.com/?q=!ducky+English Libretto {{work.composer}} {{work.title}}" target="_blank" type="button" id="librettobutton"><span class="glyphicon glyphicon glyphicon glyphicon-book"></span></a>
+    {% endif %}
+
+    {% if current_user.is_authenticated %}
+    {% if current_user.has_visited(work) %}
+    <a class="btn btn-warning" data-toggle="popover" data-trigger="hover" data-placement="top" data-content="Remove work from visited" href="{{ url_for('albums.visit', work_id=work.id, action='unvisit') }}" type="button" id="next_button"><span class="glyphicon glyphicon-check"></span></a>
+    {% else %}
+    <a class="btn btn-default filter-button back-button" data-toggle="popover" data-trigger="hover" data-placement="top" data-content="Mark this work as visited" href="{{ url_for('albums.visit', work_id=work.id, action='visit') }}" type="button" id="next_button"><span class="glyphicon glyphicon-unchecked"></span></a>
+    {% endif %}
+    {% endif %}
+    <button id="playlist-btn" data-toggle="popover" data-trigger="hover" data-placement="top" data-content="Add selected to playlist" type="button" onclick="createplaylist()" class="btn btn-success"><span class="glyphicon glyphicon-th-list"></span></button>
+    {% if current_user.admin and not request.MOBILE %}
+    <a class="btn btn-default filter-button back-button" onclick="deletetracks('{{work.id}}')" type="button" id="delete_tracks">Delete</a>
+    {% endif %}
+    {% if not request.MOBILE %}
+    <a class="btn btn-default filter-button back-button" href='/albums/{{nextwork}}' type="button" id="next_button"><span class="glyphicon glyphicon-chevron-right"></span></a>
+    {% endif %}
+</div>
+</div>
+
+<div class="row form-row">
+    <div class="col-xs-5">
+        <form class="form">
+            <input type="text" class="form-control typeahead" onchange="this.form.submit()" name="search" value="{{searchplaceholder}}" placeholder="Search for Artist">
+       </form>
+    </div>
+    <div class="col-xs-5">
+        <form class="form">
+          <select class="form-control" onchange="this.form.submit()" name="artist" id="artistfilter">
+            <option>{{artistselect}}</option>
+            {% for artist in artists %}
+            <option value="{{artist[0].name}}">{{artist[0].name}} ({{artist[1]}})</option>
+            {% endfor %}
+          </select>
+        </form>
+    </div>
+    <div class="col-xs-2">
+        <a type="button" href="/albums/{{work.id}}"class="btn btn-primary clear-btn"><span class="sm-view glyphicon glyphicon-remove" aria-hidden="true"></span><span class="lg-view">Clear</span></a>
+    </div>
+</div>
+
+<div class="container">
+{% if searchplaceholder %}
+<p>{{"{:,}".format(albums_count)}} {% if albums_count == 1 %}album{% else %}albums{% endif %} matching <b>{{searchplaceholder}}</b> | <a style="cursor:pointer;" onclick="openNav()">Show Comments ({{posts|length}})</a></p>
+{% elif artistselect != "Filter by Artist"%}
+<p>{{"{:,}".format(albums_count)}} {% if albums_count == 1 %}album{% else %}albums{% endif %} featuring <b>{{artistselect}}</b> | <a style="cursor:pointer;" onclick="openNav()">Show Comments ({{posts|length}})</a></p>
+{% else %}
+<p>{{"{:,}".format(albums_count)}} {% if albums_count == 1 %}album{% else %}albums{% endif %} | <a style="cursor:pointer;" onclick="openNav()">Show Comments ({{posts|length}})</a></p>
+{% endif %}
+
+
+</div>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+     {% for category, message in messages %}
+    <div class="alert alert-{{category}}" role="alert">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+{% endwith %}
+
+<div class="containerscroll">
+    {% for track in tracks %}
+            {% if track.track_count > 0 %}
+                <div class="rcorners">
+                    {% if current_user.admin and not request.MOBILE %}
+                    <form class="pull-right" action="{{ url_for('admin.hide_album') }}">
+                      <input type="hidden" name="work" value="{{work.id}}">
+                      <input type="hidden" hidden name="album" value="{{work.id+track.album_id}}">
+                      <input type="submit" value="Hide">
+                    </form>
+                    <form class="pull-right" action="{{ url_for('admin.admin_easyfill') }}">
+                      <input type="hidden" name="work" value="{{work.id}}">
+                      <input type="hidden" hidden name="album" value="{{work.id+track.album_id}}">
+                      <input type="submit" value="Fill">
+                    </form>
+
+                    {% endif %}
+                {% include 'albums/_album.html' %}
+                </div>
+            {% endif %}
+    {% endfor %}
+</div>
+
+<div class="text-center">{{render_pagination(albums)}}</div>
+
+<!-- <a class="pagination__next" href="{{next_page}}" hidden>Next</a> -->
+<div class="footer dummy"></div>
+
+<audio id="preview_audio">
+  <source src="" type="audio/mpeg">
+</audio>
+
+{% if request.MOBILE %}
+{% include 'spotify/_footer_mobile.html' %}
+{% else %}
+{% include 'spotify/_footer.html' %}
+{% endif %}
+
+{% include 'albums/_showlikesmodal.html' %}
+{% include 'albums/_wikimodal.html' %}
+{% include 'spotify/_createplaylistmodal.html' %}
+{% endblock %}
